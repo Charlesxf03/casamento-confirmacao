@@ -4,19 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>Júnia & Charles · Confirmação até 10/04</title>
-    <!-- Meta tags para experiência de aplicativo -->
+    <!-- Meta tags -->
     <meta name="theme-color" content="#7c2d4f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Casamento Júnia & Charles">
-    <!-- Fontes sofisticadas -->
+    <!-- Fontes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome 6 -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* Reset e estilos gerais (mantidos os mesmos, com ajustes para o olho) */
+        /* Reset e estilos gerais */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Quicksand', sans-serif;
@@ -151,7 +151,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Área protegida - ajuste para o olho dentro do campo */
+        /* Área protegida - olho dentro do campo */
         .protected-area { margin-top: 1rem; }
         .auth-box {
             background: rgba(255, 240, 245, 0.7); border-radius: 60px; padding: 1.5rem;
@@ -170,7 +170,7 @@
         .password-wrapper input {
             width: 100%;
             padding: 0.8rem 1.2rem;
-            padding-right: 3rem; /* espaço para o ícone */
+            padding-right: 3rem;
             border: 2px solid #fde2ec;
             border-radius: 50px;
             font-family: 'Quicksand', sans-serif;
@@ -247,6 +247,15 @@
             font-size: 2.3rem; box-shadow: 0 15px 25px rgba(0,0,0,0.3); border: 3px solid white; transition: 0.3s; z-index: 100; text-decoration: none;
         }
         .whatsapp-float:hover { transform: scale(1.1) rotate(5deg); background: #20b859; }
+        
+        /* Painel de depuração (opcional) */
+        .debug-panel {
+            background: #fff3cd; border: 1px solid #ffeeba; border-radius: 40px; padding: 1rem;
+            margin-bottom: 1rem; color: #856404; font-size: 0.9rem;
+        }
+        .debug-panel button {
+            background: #856404; color: white; border: none; padding: 0.3rem 1rem; border-radius: 20px; cursor: pointer;
+        }
         @media (max-width: 768px) {
             .hero h1 { font-size: 2.5rem; } .hero h1 span { font-size: 1.8rem; letter-spacing: 3px; }
             .hero-event { font-size: 1.3rem; padding: 0.5rem 1.5rem; } .hero-time { font-size: 1.1rem; }
@@ -288,21 +297,14 @@
                 <i class="fas fa-hourglass-half"></i> Confirme sua presença até 10 de abril de 2026
             </div>
 
-            <!-- Bolhas de contato -->
             <div class="contact-bubbles">
                 <a href="https://wa.me/5531993887733?text=Olá%20Charles%21%20Tudo%20bem%3F%20Estou%20entrando%20em%20contato%20sobre%20o%20casamento%20com%20a%20Júnia." class="contact-bubble" target="_blank">
                     <i class="fab fa-whatsapp"></i>
-                    <span>
-                        <strong>Charles</strong>
-                        <small>(31) 99388-7733</small>
-                    </span>
+                    <span><strong>Charles</strong><small>(31) 99388-7733</small></span>
                 </a>
                 <a href="https://wa.me/5531975558328?text=Oi%20Júnia%21%20Que%20alegria%20poder%20participar%20desse%20momento%20especial.%20Estou%20confirmando%20minha%20presença..." class="contact-bubble" target="_blank">
                     <i class="fab fa-whatsapp"></i>
-                    <span>
-                        <strong>Júnia</strong>
-                        <small>(31) 97555-8328</small>
-                    </span>
+                    <span><strong>Júnia</strong><small>(31) 97555-8328</small></span>
                 </a>
             </div>
             <p style="margin-top: 1rem; font-size: 0.95rem; opacity: 0.9; background: rgba(0,0,0,0.1); padding: 0.3rem 1.5rem; border-radius: 40px; display: inline-block;">
@@ -312,10 +314,14 @@
     </div>
 
     <div class="app-main">
-        <!-- Área de feedback da confirmação -->
+        <!-- Área de depuração (opcional, pode remover depois) -->
+        <div id="debug-area" class="debug-panel" style="display: none;">
+            <strong>🔧 Depuração:</strong> <span id="debug-info"></span>
+            <button id="clear-data">Limpar dados</button>
+        </div>
+
         <div id="feedback-area" style="min-height: 20px;"></div>
 
-        <!-- Card de confirmação (público) -->
         <div class="card-modern">
             <div class="card-title">
                 <i class="fas fa-envelope-open-text"></i> Confirmar presença
@@ -325,30 +331,23 @@
                     <label for="mainName"><i class="fas fa-user-astronaut"></i> Seu nome completo *</label>
                     <input type="text" id="mainName" placeholder="Digite seu nome" required>
                 </div>
-
-                <!-- Campo de contato obrigatório -->
                 <div class="input-group">
                     <label for="phone"><i class="fas fa-phone-alt"></i> Telefone / WhatsApp *</label>
                     <input type="tel" id="phone" placeholder="(31) 99999-9999" required>
                 </div>
-
                 <div class="family-section">
                     <h3><i class="fas fa-heart-circle-plus"></i> Acompanhantes</h3>
-                    <div id="family-fields-container">
-                        <!-- campos dinâmicos -->
-                    </div>
+                    <div id="family-fields-container"></div>
                     <button type="button" class="btn-add-family" id="add-family-btn">
                         <i class="fas fa-plus-circle"></i> Adicionar familiar
                     </button>
                 </div>
-
                 <button type="submit" class="btn-submit">
                     <i class="fas fa-check-double"></i> Confirmar presença
                 </button>
             </form>
         </div>
 
-        <!-- Card da lista de convidados (protegido por senha) -->
         <div class="card-modern">
             <div class="card-title">
                 <i class="fas fa-champagne-glasses"></i> Lista de confirmações
@@ -356,9 +355,7 @@
                     <i class="fas fa-lock" id="lockIcon"></i> <span id="authStatus">Apenas noivos</span>
                 </span>
             </div>
-            <div id="guest-list-container" class="protected-area">
-                <!-- Conteúdo gerenciado pelo JS -->
-            </div>
+            <div id="guest-list-container" class="protected-area"></div>
         </div>
 
         <div class="footer-app">
@@ -366,7 +363,6 @@
         </div>
     </div>
 
-    <!-- Botão flutuante WhatsApp -->
     <a href="https://wa.me/5531975558328?text=Oi%2C%20tudo%20bem%3F%20Gostaria%20de%20falar%20sobre%20o%20casamento." class="whatsapp-float" target="_blank">
         <i class="fab fa-whatsapp"></i>
     </a>
@@ -377,7 +373,6 @@
             let guests = [];
             let authenticated = false;
 
-            // Elementos DOM
             const form = document.getElementById('guest-form');
             const mainNameInput = document.getElementById('mainName');
             const phoneInput = document.getElementById('phone');
@@ -387,35 +382,35 @@
             const lockIcon = document.getElementById('lockIcon');
             const authStatus = document.getElementById('authStatus');
             const feedbackArea = document.getElementById('feedback-area');
+            const debugInfo = document.getElementById('debug-info');
+            const debugArea = document.getElementById('debug-area');
 
-            // Carrega os dados do localStorage
+            function updateDebug() {
+                if (debugInfo) debugInfo.innerText = `Total no array: ${guests.length} | Autenticado: ${authenticated}`;
+            }
+
             function loadGuests() {
                 const stored = localStorage.getItem(STORAGE_KEY);
-                if (stored) {
-                    try { guests = JSON.parse(stored); } catch(e) { guests = []; }
-                } else {
-                    guests = [];
-                }
+                if (stored) { try { guests = JSON.parse(stored); } catch(e) { guests = []; } } else { guests = []; }
+                console.log('Dados carregados:', guests);
+                updateDebug();
                 renderGuestList();
             }
 
             function saveGuests() {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(guests));
+                console.log('Dados salvos:', guests);
+                updateDebug();
             }
 
-            // Feedback visual após confirmação
             function showFeedback(guestData) {
                 const { mainName, phone, family } = guestData;
                 let familyHtml = '';
                 if (family && family.length > 0) {
                     familyHtml = '<div class="family-feedback"><strong>Acompanhantes:</strong><ul style="margin-left: 1.2rem;">';
-                    family.forEach(f => {
-                        familyHtml += `<li>${f.name} (${f.relation})</li>`;
-                    });
+                    family.forEach(f => { familyHtml += `<li>${f.name} (${f.relation})</li>`; });
                     familyHtml += '</ul></div>';
-                } else {
-                    familyHtml = '<p><em>Sem acompanhantes</em></p>';
-                }
+                } else { familyHtml = '<p><em>Sem acompanhantes</em></p>'; }
 
                 const feedbackDiv = document.createElement('div');
                 feedbackDiv.className = 'feedback-card';
@@ -430,16 +425,11 @@
                     </div>
                     <button class="feedback-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
                 `;
-
                 feedbackArea.innerHTML = '';
                 feedbackArea.appendChild(feedbackDiv);
-
-                setTimeout(() => {
-                    if (feedbackDiv.parentNode) feedbackDiv.remove();
-                }, 8000);
+                setTimeout(() => { if (feedbackDiv.parentNode) feedbackDiv.remove(); }, 8000);
             }
 
-            // Renderiza a área de acordo com autenticação
             function renderGuestList() {
                 if (authenticated) {
                     lockIcon.className = 'fas fa-lock-open';
@@ -462,7 +452,6 @@
                             </div>
                         </div>
                     `;
-                    // Evento para mostrar/ocultar senha
                     const toggleBtn = document.getElementById('togglePassword');
                     const passwordInput = document.getElementById('passwordInput');
                     if (toggleBtn && passwordInput) {
@@ -473,113 +462,67 @@
                         });
                     }
                     document.getElementById('authBtn')?.addEventListener('click', checkPassword);
-                    passwordInput?.addEventListener('keypress', (e) => {
-                        if (e.key === 'Enter') checkPassword();
-                    });
+                    passwordInput?.addEventListener('keypress', (e) => { if (e.key === 'Enter') checkPassword(); });
                 }
             }
 
             function checkPassword() {
                 const pwd = document.getElementById('passwordInput')?.value;
-                if (pwd === 'noivos2026') {
-                    authenticated = true;
-                    renderGuestList();
-                } else {
-                    alert('Senha incorreta!');
-                }
+                if (pwd === 'noivos2026') { authenticated = true; renderGuestList(); } 
+                else { alert('Senha incorreta!'); }
             }
 
-            // Renderiza a lista completa com estatísticas (apenas para noivos)
             function renderGuests() {
                 if (!guests.length) {
                     guestListContainer.innerHTML = '<div class="empty-state"><i class="fa-regular fa-face-smile-wink"></i> Ninguém confirmou ainda. <br> Seja o primeiro!</div>';
                     return;
                 }
-
-                // Cálculo preciso das estatísticas
                 const totalConfirmacoes = guests.length;
                 let totalAcompanhantes = 0;
                 guests.forEach(g => { totalAcompanhantes += g.family ? g.family.length : 0; });
                 const totalPessoas = totalConfirmacoes + totalAcompanhantes;
                 const mediaAcompanhantes = totalConfirmacoes > 0 ? (totalAcompanhantes / totalConfirmacoes).toFixed(1) : 0;
 
-                let html = `
-                    <div class="stats-panel">
-                        <div class="stat-item">
-                            <div class="stat-value">${totalConfirmacoes}</div>
-                            <div class="stat-label">Confirmações</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">${totalPessoas}</div>
-                            <div class="stat-label">Pessoas</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">${totalAcompanhantes}</div>
-                            <div class="stat-label">Acompanhantes</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">${mediaAcompanhantes}</div>
-                            <div class="stat-label">Média por grupo</div>
-                        </div>
-                    </div>
-                `;
+                let html = `<div class="stats-panel">
+                    <div class="stat-item"><div class="stat-value">${totalConfirmacoes}</div><div class="stat-label">Confirmações</div></div>
+                    <div class="stat-item"><div class="stat-value">${totalPessoas}</div><div class="stat-label">Pessoas</div></div>
+                    <div class="stat-item"><div class="stat-value">${totalAcompanhantes}</div><div class="stat-label">Acompanhantes</div></div>
+                    <div class="stat-item"><div class="stat-value">${mediaAcompanhantes}</div><div class="stat-label">Média por grupo</div></div>
+                </div>`;
 
                 guests.forEach(guest => {
                     const family = guest.family || [];
-                    const familyBadges = family.map(f => 
-                        `<span class="family-badge"><i class="fas fa-user-plus"></i> ${f.name} (${f.relation})</span>`
-                    ).join('');
-                    html += `
-                        <div class="guest-item" data-id="${guest.id}">
-                            <div class="guest-header">
-                                <span class="guest-main"><i class="fas fa-crown"></i> ${guest.mainName}</span>
-                                <button class="delete-guest" onclick="removeGuest(${guest.id})" title="Remover"><i class="fas fa-trash-alt"></i></button>
-                            </div>
-                            <div style="margin-left: 2.2rem; margin-bottom: 0.5rem; font-size: 0.95rem; color: #a55a7a;">
-                                <i class="fas fa-phone-alt"></i> ${guest.phone}
-                            </div>
-                            <div class="family-list">${familyBadges}</div>
-                        </div>
-                    `;
+                    const familyBadges = family.map(f => `<span class="family-badge"><i class="fas fa-user-plus"></i> ${f.name} (${f.relation})</span>`).join('');
+                    html += `<div class="guest-item" data-id="${guest.id}">
+                        <div class="guest-header"><span class="guest-main"><i class="fas fa-crown"></i> ${guest.mainName}</span>
+                        <button class="delete-guest" onclick="removeGuest(${guest.id})" title="Remover"><i class="fas fa-trash-alt"></i></button></div>
+                        <div style="margin-left: 2.2rem; margin-bottom: 0.5rem; font-size: 0.95rem; color: #a55a7a;"><i class="fas fa-phone-alt"></i> ${guest.phone}</div>
+                        <div class="family-list">${familyBadges}</div>
+                    </div>`;
                 });
-
                 html += `<div style="text-align: right; margin-top: 1rem;"><button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Sair (modo noivos)</button></div>`;
                 guestListContainer.innerHTML = html;
-                document.getElementById('logoutBtn')?.addEventListener('click', () => {
-                    authenticated = false;
-                    renderGuestList();
-                });
+                document.getElementById('logoutBtn')?.addEventListener('click', () => { authenticated = false; renderGuestList(); });
             }
 
-            // Funções para gerenciar familiares
             function addFamilyField(name = '', relation = 'filho') {
                 const fieldDiv = document.createElement('div'); fieldDiv.className = 'family-field';
-                const nameInput = document.createElement('input');
-                nameInput.type = 'text'; nameInput.placeholder = 'Nome do familiar'; nameInput.value = name;
+                const nameInput = document.createElement('input'); nameInput.type = 'text'; nameInput.placeholder = 'Nome do familiar'; nameInput.value = name;
                 const relationSelect = document.createElement('select');
                 const options = ['filho', 'esposo', 'esposa'];
                 options.forEach(opt => {
-                    const option = document.createElement('option');
-                    option.value = opt;
-                    option.textContent = opt;
+                    const option = document.createElement('option'); option.value = opt; option.textContent = opt;
                     if (opt === relation) option.selected = true;
                     relationSelect.appendChild(option);
                 });
-                const removeBtn = document.createElement('button');
-                removeBtn.type = 'button'; removeBtn.className = 'remove-family';
+                const removeBtn = document.createElement('button'); removeBtn.type = 'button'; removeBtn.className = 'remove-family';
                 removeBtn.innerHTML = '<i class="fas fa-times-circle"></i>';
                 removeBtn.addEventListener('click', () => fieldDiv.remove());
-                fieldDiv.appendChild(nameInput);
-                fieldDiv.appendChild(relationSelect);
-                fieldDiv.appendChild(removeBtn);
+                fieldDiv.appendChild(nameInput); fieldDiv.appendChild(relationSelect); fieldDiv.appendChild(removeBtn);
                 familyContainer.appendChild(fieldDiv);
             }
 
-            function resetForm() {
-                mainNameInput.value = '';
-                phoneInput.value = '';
-                familyContainer.innerHTML = '';
-            }
+            function resetForm() { mainNameInput.value = ''; phoneInput.value = ''; familyContainer.innerHTML = ''; }
 
             function collectFamilyData() {
                 const fields = document.querySelectorAll('.family-field');
@@ -590,51 +533,39 @@
                     if (nameInput && relationSelect) {
                         const name = nameInput.value.trim();
                         const relation = relationSelect.value;
-                        if (name !== '') {
-                            family.push({ name, relation });
-                        }
+                        if (name !== '') family.push({ name, relation });
                     }
                 });
                 return family;
             }
 
-            // Evento de submit do formulário
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
                 const mainName = mainNameInput.value.trim();
                 const phone = phoneInput.value.trim();
                 if (!mainName) { alert('Por favor, digite seu nome.'); return; }
                 if (!phone) { alert('Por favor, informe seu telefone para contato.'); return; }
-
                 const family = collectFamilyData();
-                const newGuest = {
-                    id: Date.now(),
-                    mainName,
-                    phone,
-                    family: family
-                };
-
+                const newGuest = { id: Date.now(), mainName, phone, family };
                 guests.push(newGuest);
                 saveGuests();
-
-                // Mostra feedback
                 showFeedback(newGuest);
-
-                // Se estiver autenticado, atualiza a lista imediatamente
                 if (authenticated) renderGuests(); else renderGuestList();
                 resetForm();
             });
 
             addFamilyBtn.addEventListener('click', () => addFamilyField());
 
-            // Função global para remover convidado (usada nos botões delete)
             window.removeGuest = function(id) {
                 guests = guests.filter(g => g.id !== id);
                 saveGuests();
                 if (authenticated) renderGuests(); else renderGuestList();
             };
 
-            // Inicializa
+            document.getElementById('clear-data')?.addEventListener('click', () => {
+                if (confirm('Limpar todas as confirmações?')) { guests = []; saveGuests(); renderGuestList(); }
+            });
+
             loadGuests();
         })();
     </script>
