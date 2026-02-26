@@ -159,12 +159,27 @@
         .auth-box p { color: #802d53; font-weight: 600; margin-bottom: 1rem; }
         .auth-input-group {
             display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;
+            position: relative;
         }
         .auth-input-group input {
             padding: 0.8rem 1.2rem; border: 2px solid #fde2ec; border-radius: 50px;
             font-family: 'Quicksand', sans-serif; font-size: 1rem; flex: 1; min-width: 200px;
+            padding-right: 3rem; /* espaço para o ícone */
         }
         .auth-input-group input:focus { border-color: #d4618c; outline: none; }
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #b24c74;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+        }
+        .password-toggle:hover { color: #8e3b5f; }
         .auth-btn {
             background: #b24c74; color: white; border: none; padding: 0.8rem 2rem;
             border-radius: 50px; font-weight: 600; cursor: pointer; transition: 0.2s;
@@ -399,13 +414,17 @@
             // Função para carregar convidados
             function loadGuests() {
                 const stored = localStorage.getItem(STORAGE_KEY);
-                if (stored) { try { guests = JSON.parse(stored); } catch { guests = []; } } else { guests = []; }
+                if (stored) { 
+                    try { guests = JSON.parse(stored); } catch(e) { guests = []; } 
+                } else { 
+                    guests = []; 
+                }
                 renderGuestList(); // atualiza a lista (respeitando autenticação)
             }
 
             function saveGuests() { localStorage.setItem(STORAGE_KEY, JSON.stringify(guests)); }
 
-            // Renderiza apenas se autenticado, senão mostra caixa de senha
+            // Renderiza apenas se autenticado, senão mostra caixa de senha com ícone de olho
             function renderGuestList() {
                 if (authenticated) {
                     lockIcon.className = 'fas fa-lock-open';
@@ -419,12 +438,25 @@
                             <p><i class="fas fa-shield-alt"></i> Área restrita aos noivos</p>
                             <div class="auth-input-group">
                                 <input type="password" id="passwordInput" placeholder="Digite a senha" />
+                                <button class="password-toggle" id="togglePassword" type="button">
+                                    <i class="fas fa-eye"></i>
+                                </button>
                                 <button class="auth-btn" id="authBtn"><i class="fas fa-unlock-alt"></i> Acessar</button>
                             </div>
                         </div>
                     `;
+                    // Evento para mostrar/ocultar senha
+                    const toggleBtn = document.getElementById('togglePassword');
+                    const passwordInput = document.getElementById('passwordInput');
+                    if (toggleBtn && passwordInput) {
+                        toggleBtn.addEventListener('click', function() {
+                            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                            passwordInput.setAttribute('type', type);
+                            this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+                        });
+                    }
                     document.getElementById('authBtn')?.addEventListener('click', checkPassword);
-                    document.getElementById('passwordInput')?.addEventListener('keypress', (e) => {
+                    passwordInput?.addEventListener('keypress', (e) => {
                         if (e.key === 'Enter') checkPassword();
                     });
                 }
@@ -571,18 +603,21 @@
                 // Mostra feedback com os dados inseridos
                 showFeedback(newGuest);
 
+                // Se estiver autenticado, atualiza a lista imediatamente
                 if (authenticated) renderGuests(); else renderGuestList();
                 resetForm();
             });
 
             addFamilyBtn.addEventListener('click', () => addFamilyField());
 
+            // Função global para remover convidado (usada nos botões delete)
             window.removeGuest = function(id) {
                 guests = guests.filter(g => g.id !== id);
                 saveGuests();
                 if (authenticated) renderGuests(); else renderGuestList();
             };
 
+            // Inicializa carregando os dados
             loadGuests();
         })();
     </script>
