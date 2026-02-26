@@ -15,11 +15,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Firebase SDK (versão compat) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        /* (mesmo estilo de antes, omitido por brevidade – mantenha o que você já tinha) */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Quicksand', sans-serif;
@@ -370,21 +369,29 @@
     </a>
 
     <script>
-        // 🔥 SUA CONFIGURAÇÃO DO FIREBASE (adaptada para versão compat)
+        // 🔥 CONFIGURAÇÃO DO FIREBASE (com a URL padrão do seu projeto)
         const firebaseConfig = {
             apiKey: "AIzaSyDwlHZ0cxYVHGiOUyO37lxXy9weUgHYsoc",
             authDomain: "casamento-junia-charles.firebaseapp.com",
-            databaseURL: "https://casamento-junia-charles-default-rtdb.firebaseio.com",
+            databaseURL: "https://casamento-junia-charles-default-rtdb.firebaseio.com", // Verifique se esta URL está correta no seu console Firebase
             projectId: "casamento-junia-charles",
             storageBucket: "casamento-junia-charles.firebasestorage.app",
             messagingSenderId: "517322884215",
             appId: "1:517322884215:web:efe0162432807583edb272"
         };
 
-        // Inicializa o Firebase (compat)
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const confirmacoesRef = database.ref('confirmacoes');
+        // Inicializa o Firebase
+        let database;
+        let confirmacoesRef;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+            confirmacoesRef = database.ref('confirmacoes');
+            console.log('Firebase inicializado com sucesso!');
+        } catch (error) {
+            console.error('Erro ao inicializar Firebase:', error);
+            alert('Erro de configuração do Firebase. Verifique sua chave e URL do banco de dados.');
+        }
 
         (function() {
             let guests = [];
@@ -401,18 +408,25 @@
             const feedbackArea = document.getElementById('feedback-area');
             const debugInfo = document.getElementById('debug-info');
 
-            // Listener do Firebase: atualiza guests sempre que algo muda
-            confirmacoesRef.on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    guests = Object.values(data); // converte objeto em array
-                } else {
-                    guests = [];
-                }
-                console.log('Dados carregados do Firebase:', guests);
-                if (debugInfo) debugInfo.innerText = `Total: ${guests.length}`;
-                renderGuestList(); // atualiza a tela (respeitando autenticação)
-            });
+            if (confirmacoesRef) {
+                // Listener do Firebase
+                confirmacoesRef.on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        guests = Object.values(data);
+                    } else {
+                        guests = [];
+                    }
+                    console.log('Dados carregados:', guests);
+                    if (debugInfo) debugInfo.innerText = `Total: ${guests.length}`;
+                    renderGuestList();
+                }, (error) => {
+                    console.error('Erro ao carregar dados:', error);
+                    guestListContainer.innerHTML = `<div class="empty-state">Erro ao conectar com o banco. Verifique as regras do Firebase.</div>`;
+                });
+            } else {
+                guestListContainer.innerHTML = `<div class="empty-state">Firebase não inicializado. Verifique a configuração.</div>`;
+            }
 
             function showFeedback(guestData) {
                 const { mainName, phone, family } = guestData;
@@ -479,8 +493,12 @@
 
             function checkPassword() {
                 const pwd = document.getElementById('passwordInput')?.value;
-                if (pwd === 'noivos2026') { authenticated = true; renderGuestList(); } 
-                else { alert('Senha incorreta!'); }
+                if (pwd === 'noivos2026') { 
+                    authenticated = true; 
+                    renderGuestList(); 
+                } else { 
+                    alert('Senha incorreta!'); 
+                }
             }
 
             function renderGuests() {
@@ -558,23 +576,24 @@
                 if (!phone) { alert('Por favor, informe seu telefone para contato.'); return; }
                 const family = collectFamilyData();
                 const newGuest = { 
-                    id: Date.now().toString(), // ID único
+                    id: Date.now().toString(),
                     mainName, 
                     phone, 
                     family 
                 };
-                // Salva no Firebase (gera chave única automaticamente)
-                confirmacoesRef.push(newGuest);
-                showFeedback(newGuest);
-                resetForm();
-                // A lista será atualizada pelo listener do Firebase
+                if (confirmacoesRef) {
+                    confirmacoesRef.push(newGuest);
+                    showFeedback(newGuest);
+                    resetForm();
+                } else {
+                    alert('Firebase não disponível. Verifique a configuração.');
+                }
             });
 
             addFamilyBtn.addEventListener('click', () => addFamilyField());
 
-            // Função para remover convidado (só funciona se autenticado)
             window.removeGuest = function(id) {
-                if (!authenticated) return;
+                if (!authenticated || !confirmacoesRef) return;
                 confirmacoesRef.once('value', (snapshot) => {
                     snapshot.forEach((childSnapshot) => {
                         if (childSnapshot.val().id === id) {
@@ -584,10 +603,9 @@
                 });
             };
 
-            // Botão para limpar tudo (útil para testes)
             document.getElementById('clear-data')?.addEventListener('click', () => {
                 if (confirm('Limpar todas as confirmações?')) {
-                    confirmacoesRef.remove();
+                    if (confirmacoesRef) confirmacoesRef.remove();
                 }
             });
         })();
