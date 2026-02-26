@@ -16,6 +16,7 @@
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* Reset e estilos gerais (mantidos os mesmos, com ajustes para o olho) */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Quicksand', sans-serif;
@@ -150,7 +151,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Área protegida */
+        /* Área protegida - ajuste para o olho dentro do campo */
         .protected-area { margin-top: 1rem; }
         .auth-box {
             background: rgba(255, 240, 245, 0.7); border-radius: 60px; padding: 1.5rem;
@@ -159,14 +160,26 @@
         .auth-box p { color: #802d53; font-weight: 600; margin-bottom: 1rem; }
         .auth-input-group {
             display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;
+            align-items: center;
+        }
+        .password-wrapper {
             position: relative;
+            flex: 1;
+            min-width: 200px;
         }
-        .auth-input-group input {
-            padding: 0.8rem 1.2rem; border: 2px solid #fde2ec; border-radius: 50px;
-            font-family: 'Quicksand', sans-serif; font-size: 1rem; flex: 1; min-width: 200px;
+        .password-wrapper input {
+            width: 100%;
+            padding: 0.8rem 1.2rem;
             padding-right: 3rem; /* espaço para o ícone */
+            border: 2px solid #fde2ec;
+            border-radius: 50px;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1rem;
         }
-        .auth-input-group input:focus { border-color: #d4618c; outline: none; }
+        .password-wrapper input:focus {
+            border-color: #d4618c;
+            outline: none;
+        }
         .password-toggle {
             position: absolute;
             right: 10px;
@@ -177,7 +190,7 @@
             cursor: pointer;
             color: #b24c74;
             font-size: 1.2rem;
-            padding: 0.5rem;
+            padding: 0.2rem;
         }
         .password-toggle:hover { color: #8e3b5f; }
         .auth-btn {
@@ -275,7 +288,7 @@
                 <i class="fas fa-hourglass-half"></i> Confirme sua presença até 10 de abril de 2026
             </div>
 
-            <!-- Bolhas de contato com números e mensagens corretas -->
+            <!-- Bolhas de contato -->
             <div class="contact-bubbles">
                 <a href="https://wa.me/5531993887733?text=Olá%20Charles%21%20Tudo%20bem%3F%20Estou%20entrando%20em%20contato%20sobre%20o%20casamento%20com%20a%20Júnia." class="contact-bubble" target="_blank">
                     <i class="fab fa-whatsapp"></i>
@@ -299,7 +312,7 @@
     </div>
 
     <div class="app-main">
-        <!-- Área de feedback da confirmação (aparece temporariamente) -->
+        <!-- Área de feedback da confirmação -->
         <div id="feedback-area" style="min-height: 20px;"></div>
 
         <!-- Card de confirmação (público) -->
@@ -322,7 +335,7 @@
                 <div class="family-section">
                     <h3><i class="fas fa-heart-circle-plus"></i> Acompanhantes</h3>
                     <div id="family-fields-container">
-                        <!-- campos dinâmicos serão inseridos aqui -->
+                        <!-- campos dinâmicos -->
                     </div>
                     <button type="button" class="btn-add-family" id="add-family-btn">
                         <i class="fas fa-plus-circle"></i> Adicionar familiar
@@ -344,7 +357,7 @@
                 </span>
             </div>
             <div id="guest-list-container" class="protected-area">
-                <!-- Conteúdo será gerenciado pelo JS -->
+                <!-- Conteúdo gerenciado pelo JS -->
             </div>
         </div>
 
@@ -353,7 +366,7 @@
         </div>
     </div>
 
-    <!-- Botão flutuante WhatsApp (acesso rápido com mensagem genérica) -->
+    <!-- Botão flutuante WhatsApp -->
     <a href="https://wa.me/5531975558328?text=Oi%2C%20tudo%20bem%3F%20Gostaria%20de%20falar%20sobre%20o%20casamento." class="whatsapp-float" target="_blank">
         <i class="fab fa-whatsapp"></i>
     </a>
@@ -362,8 +375,9 @@
         (function() {
             const STORAGE_KEY = 'weddingGuestsJuniaCharles2026';
             let guests = [];
-            let authenticated = false; // controle de acesso à lista
+            let authenticated = false;
 
+            // Elementos DOM
             const form = document.getElementById('guest-form');
             const mainNameInput = document.getElementById('mainName');
             const phoneInput = document.getElementById('phone');
@@ -374,7 +388,22 @@
             const authStatus = document.getElementById('authStatus');
             const feedbackArea = document.getElementById('feedback-area');
 
-            // Função para mostrar feedback da confirmação
+            // Carrega os dados do localStorage
+            function loadGuests() {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    try { guests = JSON.parse(stored); } catch(e) { guests = []; }
+                } else {
+                    guests = [];
+                }
+                renderGuestList();
+            }
+
+            function saveGuests() {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(guests));
+            }
+
+            // Feedback visual após confirmação
             function showFeedback(guestData) {
                 const { mainName, phone, family } = guestData;
                 let familyHtml = '';
@@ -402,29 +431,15 @@
                     <button class="feedback-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
                 `;
 
-                feedbackArea.innerHTML = ''; // limpa feedback anterior
+                feedbackArea.innerHTML = '';
                 feedbackArea.appendChild(feedbackDiv);
 
-                // Remove automaticamente após 8 segundos
                 setTimeout(() => {
                     if (feedbackDiv.parentNode) feedbackDiv.remove();
                 }, 8000);
             }
 
-            // Função para carregar convidados
-            function loadGuests() {
-                const stored = localStorage.getItem(STORAGE_KEY);
-                if (stored) { 
-                    try { guests = JSON.parse(stored); } catch(e) { guests = []; } 
-                } else { 
-                    guests = []; 
-                }
-                renderGuestList(); // atualiza a lista (respeitando autenticação)
-            }
-
-            function saveGuests() { localStorage.setItem(STORAGE_KEY, JSON.stringify(guests)); }
-
-            // Renderiza apenas se autenticado, senão mostra caixa de senha com ícone de olho
+            // Renderiza a área de acordo com autenticação
             function renderGuestList() {
                 if (authenticated) {
                     lockIcon.className = 'fas fa-lock-open';
@@ -437,10 +452,12 @@
                         <div class="auth-box">
                             <p><i class="fas fa-shield-alt"></i> Área restrita aos noivos</p>
                             <div class="auth-input-group">
-                                <input type="password" id="passwordInput" placeholder="Digite a senha" />
-                                <button class="password-toggle" id="togglePassword" type="button">
-                                    <i class="fas fa-eye"></i>
-                                </button>
+                                <div class="password-wrapper">
+                                    <input type="password" id="passwordInput" placeholder="Digite a senha" />
+                                    <button class="password-toggle" id="togglePassword" type="button">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
                                 <button class="auth-btn" id="authBtn"><i class="fas fa-unlock-alt"></i> Acessar</button>
                             </div>
                         </div>
@@ -472,14 +489,14 @@
                 }
             }
 
-            // Função que realmente desenha a lista com estatísticas (chamada quando autenticado)
+            // Renderiza a lista completa com estatísticas (apenas para noivos)
             function renderGuests() {
                 if (!guests.length) {
                     guestListContainer.innerHTML = '<div class="empty-state"><i class="fa-regular fa-face-smile-wink"></i> Ninguém confirmou ainda. <br> Seja o primeiro!</div>';
                     return;
                 }
 
-                // Cálculo das estatísticas
+                // Cálculo preciso das estatísticas
                 const totalConfirmacoes = guests.length;
                 let totalAcompanhantes = 0;
                 guests.forEach(g => { totalAcompanhantes += g.family ? g.family.length : 0; });
@@ -581,7 +598,7 @@
                 return family;
             }
 
-            // Evento de submit do formulário (público)
+            // Evento de submit do formulário
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
                 const mainName = mainNameInput.value.trim();
@@ -600,7 +617,7 @@
                 guests.push(newGuest);
                 saveGuests();
 
-                // Mostra feedback com os dados inseridos
+                // Mostra feedback
                 showFeedback(newGuest);
 
                 // Se estiver autenticado, atualiza a lista imediatamente
@@ -617,7 +634,7 @@
                 if (authenticated) renderGuests(); else renderGuestList();
             };
 
-            // Inicializa carregando os dados
+            // Inicializa
             loadGuests();
         })();
     </script>
