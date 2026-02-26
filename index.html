@@ -15,8 +15,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Firebase SDK (versão compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        /* Reset e estilos gerais */
+        /* (mesmo estilo de antes, omitido por brevidade – mantenha o que você já tinha) */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Quicksand', sans-serif;
@@ -248,7 +251,7 @@
         }
         .whatsapp-float:hover { transform: scale(1.1) rotate(5deg); background: #20b859; }
         
-        /* Painel de depuração (opcional) */
+        /* Depuração */
         .debug-panel {
             background: #fff3cd; border: 1px solid #ffeeba; border-radius: 40px; padding: 1rem;
             margin-bottom: 1rem; color: #856404; font-size: 0.9rem;
@@ -314,7 +317,6 @@
     </div>
 
     <div class="app-main">
-        <!-- Área de depuração (opcional, pode remover depois) -->
         <div id="debug-area" class="debug-panel" style="display: none;">
             <strong>🔧 Depuração:</strong> <span id="debug-info"></span>
             <button id="clear-data">Limpar dados</button>
@@ -368,8 +370,23 @@
     </a>
 
     <script>
+        // 🔥 SUA CONFIGURAÇÃO DO FIREBASE (adaptada para versão compat)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDwlHZ0cxYVHGiOUyO37lxXy9weUgHYsoc",
+            authDomain: "casamento-junia-charles.firebaseapp.com",
+            databaseURL: "https://casamento-junia-charles-default-rtdb.firebaseio.com",
+            projectId: "casamento-junia-charles",
+            storageBucket: "casamento-junia-charles.firebasestorage.app",
+            messagingSenderId: "517322884215",
+            appId: "1:517322884215:web:efe0162432807583edb272"
+        };
+
+        // Inicializa o Firebase (compat)
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const confirmacoesRef = database.ref('confirmacoes');
+
         (function() {
-            const STORAGE_KEY = 'weddingGuestsJuniaCharles2026';
             let guests = [];
             let authenticated = false;
 
@@ -383,25 +400,19 @@
             const authStatus = document.getElementById('authStatus');
             const feedbackArea = document.getElementById('feedback-area');
             const debugInfo = document.getElementById('debug-info');
-            const debugArea = document.getElementById('debug-area');
 
-            function updateDebug() {
-                if (debugInfo) debugInfo.innerText = `Total no array: ${guests.length} | Autenticado: ${authenticated}`;
-            }
-
-            function loadGuests() {
-                const stored = localStorage.getItem(STORAGE_KEY);
-                if (stored) { try { guests = JSON.parse(stored); } catch(e) { guests = []; } } else { guests = []; }
-                console.log('Dados carregados:', guests);
-                updateDebug();
-                renderGuestList();
-            }
-
-            function saveGuests() {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(guests));
-                console.log('Dados salvos:', guests);
-                updateDebug();
-            }
+            // Listener do Firebase: atualiza guests sempre que algo muda
+            confirmacoesRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    guests = Object.values(data); // converte objeto em array
+                } else {
+                    guests = [];
+                }
+                console.log('Dados carregados do Firebase:', guests);
+                if (debugInfo) debugInfo.innerText = `Total: ${guests.length}`;
+                renderGuestList(); // atualiza a tela (respeitando autenticação)
+            });
 
             function showFeedback(guestData) {
                 const { mainName, phone, family } = guestData;
@@ -495,7 +506,7 @@
                     const familyBadges = family.map(f => `<span class="family-badge"><i class="fas fa-user-plus"></i> ${f.name} (${f.relation})</span>`).join('');
                     html += `<div class="guest-item" data-id="${guest.id}">
                         <div class="guest-header"><span class="guest-main"><i class="fas fa-crown"></i> ${guest.mainName}</span>
-                        <button class="delete-guest" onclick="removeGuest(${guest.id})" title="Remover"><i class="fas fa-trash-alt"></i></button></div>
+                        <button class="delete-guest" onclick="removeGuest('${guest.id}')" title="Remover"><i class="fas fa-trash-alt"></i></button></div>
                         <div style="margin-left: 2.2rem; margin-bottom: 0.5rem; font-size: 0.95rem; color: #a55a7a;"><i class="fas fa-phone-alt"></i> ${guest.phone}</div>
                         <div class="family-list">${familyBadges}</div>
                     </div>`;
@@ -546,27 +557,39 @@
                 if (!mainName) { alert('Por favor, digite seu nome.'); return; }
                 if (!phone) { alert('Por favor, informe seu telefone para contato.'); return; }
                 const family = collectFamilyData();
-                const newGuest = { id: Date.now(), mainName, phone, family };
-                guests.push(newGuest);
-                saveGuests();
+                const newGuest = { 
+                    id: Date.now().toString(), // ID único
+                    mainName, 
+                    phone, 
+                    family 
+                };
+                // Salva no Firebase (gera chave única automaticamente)
+                confirmacoesRef.push(newGuest);
                 showFeedback(newGuest);
-                if (authenticated) renderGuests(); else renderGuestList();
                 resetForm();
+                // A lista será atualizada pelo listener do Firebase
             });
 
             addFamilyBtn.addEventListener('click', () => addFamilyField());
 
+            // Função para remover convidado (só funciona se autenticado)
             window.removeGuest = function(id) {
-                guests = guests.filter(g => g.id !== id);
-                saveGuests();
-                if (authenticated) renderGuests(); else renderGuestList();
+                if (!authenticated) return;
+                confirmacoesRef.once('value', (snapshot) => {
+                    snapshot.forEach((childSnapshot) => {
+                        if (childSnapshot.val().id === id) {
+                            childSnapshot.ref.remove();
+                        }
+                    });
+                });
             };
 
+            // Botão para limpar tudo (útil para testes)
             document.getElementById('clear-data')?.addEventListener('click', () => {
-                if (confirm('Limpar todas as confirmações?')) { guests = []; saveGuests(); renderGuestList(); }
+                if (confirm('Limpar todas as confirmações?')) {
+                    confirmacoesRef.remove();
+                }
             });
-
-            loadGuests();
         })();
     </script>
 </body>
